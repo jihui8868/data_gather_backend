@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from typing import Annotated
 
@@ -16,6 +17,8 @@ from app.schemas import (
     TemperatureCreate,
 )
 
+logger = logging.getLogger(__name__)
+
 DbSession = Annotated[Session, Depends(get_db)]
 
 
@@ -32,6 +35,7 @@ def build_router(
         "", response_model=ReadingOut, status_code=status.HTTP_201_CREATED, summary=f"保存{tag}数据"
     )
     def create(payload: create_schema, db: DbSession):  # type: ignore[valid-type]
+        logger.info("保存%s数据 payload=%s", tag, payload.model_dump_json())
         data = payload.model_dump()
         data["collected_at"] = data["collected_at"] or datetime.now()
         obj = model(**data)
